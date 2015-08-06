@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -25,7 +26,6 @@ public abstract class TCPCommonBase implements Runnable {
     protected BufferedReader in;
     protected Socket socket;
     protected int port;
-    protected boolean isOn;
     protected ReceiveListener receiveListenner;
     
     public abstract void init();
@@ -38,18 +38,25 @@ public abstract class TCPCommonBase implements Runnable {
         TAG = tag;
     }
     
+    public void stop() {
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(TCPCommonBase.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public void send(String msg) throws IOException {
         out.writeBytes(msg);
     }
 
-    public void stop() {
-        isOn = false;
-    }
-
     protected void receive(String message) {
-        Matcher matcher = Pattern.compile("^server(\\s.*)*").matcher(message);
+        if(message == null)
+            return;
+        
+        Matcher matcher = Pattern.compile("^server(\\s.*)?").matcher(message);
         if(matcher.find()) {
-            String param = matcher.group(1);
+            String param = matcher.group(1).trim();
             if(param.equals("stop"))
                 stop();
         }
@@ -62,16 +69,16 @@ public abstract class TCPCommonBase implements Runnable {
     public void run() {
         try {
             init();
-            System.out.println("Server " + TAG + " running...");
             
-            while(isOn) {
-                System.out.println("Server " + TAG + " waiting...");
+            while(true) {
                 String message = in.readLine();
-                System.out.println("Server " + TAG + " received...");
                 receive(message);
             }
+        } catch (SocketException ex) {
+            if(!ex.getMessage().equals("socket closed"))
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }
 }

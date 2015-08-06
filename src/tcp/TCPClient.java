@@ -33,7 +33,6 @@ public class TCPClient extends TCPCommonBase {
             socket = new Socket(host, port);
             out = new DataOutputStream(socket.getOutputStream());
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            isOn = true;
         } catch (IOException ex) {
             Logger.getLogger(TCPClient.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -33,7 +33,6 @@ public class TCPServer extends TCPCommonBase {
             socket = welcomeSocket.accept();
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new DataOutputStream(socket.getOutputStream());
-            isOn = true;
         } catch (IOException ex) {
             Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
         }

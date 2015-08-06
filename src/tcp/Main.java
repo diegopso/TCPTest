@@ -21,8 +21,7 @@ public class Main {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws InterruptedException, IOException {
-        int portGlass = 6789;
-        int portLocal = 6788;
+        int port = 6789;
         String host = "localhost";
         Executor ex = new Executor() {
             @Override
@@ -31,36 +30,25 @@ public class Main {
             }
         };
         
-        PiGlassServer server = new PiGlassServer(portGlass, portLocal);
-        server.run();
-        
-        TCPClient glass = new TCPClient(host, portGlass);
-        glass.setTag("Glass Client");
-        glass.setReceiveListener(new ReceiveListener() {
+        TCPServer server = new TCPServer(port);
+        server.setReceiveListener(new ReceiveListener() {
             @Override
             public void onReceive(String msg) {
-                System.out.println("Glass received: " + msg);
+                System.out.println("Glass Received: " + msg);
             }
         });
-        ex.execute(glass);
         
-        TCPClient local = new TCPClient(host, portLocal);
-        local.setTag("Local Client");
-        ex.execute(local);
+        ex.execute(server);
         
-        // ensure theyre connected
-        Thread.sleep(2000);
+        TCPClient client = new TCPClient(host, port);
+        client.init();
         
-        int count = 0;
-        String[] msgs = new String[] {"ola", "glass", "bye", "glass", "server stop"};
-        while(count < 5) {
-            local.send(msgs[count]);
-            Thread.sleep(1000);
-            count++;
-        }
+        Thread.sleep(1000);
         
-        glass.stop();
-        local.stop();
+        client.send("hi\n");
+        client.send("bye\n");
+        client.send("server stop\n");
+        client.stop();
     }
     
 }
