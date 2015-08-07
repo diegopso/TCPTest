@@ -38,17 +38,14 @@ public class Main {
         System.out.println("Send `server stop` to exit!\n\n");
         
         while(true) {
-            System.out.println("> ");
             BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
             String msg = inFromUser.readLine();
             
             if(msg.equals("server stop"))
                 break;
             
-            client.send(msg);
+            client.send(msg + "\n");
         }
-        
-        client.stop();
     }
     
 }
